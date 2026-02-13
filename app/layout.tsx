@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import "./globals.css";
+import { Toaster } from "sonner";
+import { Suspense } from "react";
+import "@/app/globals.css";
+import Header from "@/components/Header";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/AppSidebar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -9,31 +13,44 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Ghost-Notes",
 };
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  display: "swap",
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className="min-h-screen bg-background antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SidebarProvider defaultOpen={false}>
+            {/* Sidebar */}
+            <Suspense fallback={<div className="w-64 border-r" />}>
+              <AppSidebar />
+            </Suspense>
+            
+            {/* Main Content Area */}
+            <SidebarInset className="flex min-h-screen w-full flex-col">
+              {/* Header */}
+              <Suspense fallback={<div className="h-16 w-full border-b" />}>
+                <Header />
+              </Suspense>
+
+              {/* Page Content */}
+              <main className="flex flex-1 flex-col px-4 pt-4 xl:px-8">
+                {children}
+              </main>
+            </SidebarInset>
+          </SidebarProvider>
+          
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
